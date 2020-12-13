@@ -7,11 +7,12 @@ using UnityEngine.UI;
 [ExecuteInEditMode]
 public class RadialUI : MonoBehaviour
 {
-	[Range(1,20)]
+	[Range(1, 20)]
 	public int count;
-	[Range(0,1)]
+	[Range(0, 1)]
 	public float space = 0;
 	public bool update;
+	public bool recreate;
 
 	private void Update()
 	{
@@ -23,15 +24,31 @@ public class RadialUI : MonoBehaviour
 
 	private void Redraw()
 	{
-		List<Transform> chids = new List<Transform>();
-		for (int i = 1; i < transform.childCount; i++)
-			chids.Add(transform.GetChild(i));
+		if (recreate)
+		{
+			List<Transform> chids = new List<Transform>();
+			for (int i = 1; i < transform.childCount; i++)
+				chids.Add(transform.GetChild(i));
 
-		foreach (Transform t in chids)
-			DestroyImmediate(t.gameObject);
+			foreach (Transform t in chids)
+				DestroyImmediate(t.gameObject);
 
-		for (int i = 1; i < count; i++)
-			Instantiate(transform.GetChild(0), transform);
+			for (int i = 1; i < count; i++)
+				Instantiate(transform.GetChild(0), transform);
+		}
+		else
+		{
+			for (int i = 1; i < Mathf.Max(transform.childCount, count); i++)
+			{
+				if (i < transform.childCount)
+				{
+					transform.GetChild(i).gameObject.SetActive(i < count);
+					continue;
+				}
+				Instantiate(transform.GetChild(0), transform);
+			}
+
+		}
 
 		float rad = (1f / count) * (1f - space);
 		float grad = 360f / count;
